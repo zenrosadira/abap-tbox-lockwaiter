@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_CLAS" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <VSEOCLASS>
+    <CLSNAME>ZTBOX_CL_LOCKWAITER</CLSNAME>
+    <LANGU>E</LANGU>
+    <DESCRIPT>TBOX - Lock Waiter</DESCRIPT>
+    <STATE>1</STATE>
+    <CLSCCINCL>X</CLSCCINCL>
+    <FIXPT>X</FIXPT>
+    <UNICODE>X</UNICODE>
+   </VSEOCLASS>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZTBOX_CL_LOCKWAITER</CLSNAME>
+     <CMPNAME>_ENQUEUE_CALLER</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Dynamic Function Module Caller</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZTBOX_CL_LOCKWAITER</CLSNAME>
+     <CMPNAME>_ENQ_MODE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Lock mode</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZTBOX_CL_LOCKWAITER</CLSNAME>
+     <CMPNAME>_ERRORS</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>ABAP System Field: Return Code of ABAP Statements</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZTBOX_CL_LOCKWAITER</CLSNAME>
+     <CMPNAME>_ROOT_TAB</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Primary table of an aggregate</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>
