@@ -7,6 +7,13 @@
    <VERSION>0.1</VERSION>
    <REPOSITORY_TYPE>abapGit</REPOSITORY_TYPE>
    <GIT_URL>https://github.com/zenrosadira/abap-tbox-lockwaiter.git</GIT_URL>
+   <DEPENDENCIES>
+    <item>
+     <GROUP_ID>ztbox</GROUP_ID>
+     <ARTIFACT_ID>abap-tbox-fmoduler</ARTIFACT_ID>
+     <GIT_URL>https://github.com/zenrosadira/abap-tbox-fmoduler.git</GIT_URL>
+    </item>
+   </DEPENDENCIES>
   </DATA>
  </asx:values>
 </asx:abap>
