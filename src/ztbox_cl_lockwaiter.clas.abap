@@ -15,9 +15,12 @@ public section.
   methods WAIT
     importing
       !I_ENDLESSLY type FLAG optional .
-  methods IS_LOCKED
+  methods LOCK_MESSAGE
     returning
       value(R_MESS) type STRING .
+  methods IS_LOCKED
+    returning
+      value(R_CHECK) type FLAG .
   methods LOCK
     importing
       !I_ENQ_MODE type C default 'E' .
@@ -284,7 +287,14 @@ CLASS ZTBOX_CL_LOCKWAITER IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD IS_LOCKED.
+  METHOD is_locked.
+
+    r_check = xsdbool( _enqueue_caller->exception( )-except = c_foreign_lock ).
+
+  ENDMETHOD.
+
+
+  METHOD lock_message.
 
     r_mess = _message.
 
