@@ -5,6 +5,7 @@ class ZTBOX_CL_LOCKWAITER definition
 
 public section.
 
+  class-methods CLASS_CONSTRUCTOR .
   methods CONSTRUCTOR
     importing
       !I_TABLE type ROOTTAB .
@@ -26,11 +27,18 @@ private section.
 
   types:
     BEGIN OF ty_key_fields,
-           fieldname TYPE feld_name,
-           value     TYPE string,
-         END OF ty_key_fields .
+      fieldname TYPE feld_name,
+      value     TYPE string,
+    END OF ty_key_fields .
   types:
     ty_key_fields_t TYPE TABLE OF ty_key_fields WITH KEY fieldname .
+  types:
+    BEGIN OF ty_lock_modes,
+           lock_mode TYPE eqegramode,
+           collision TYPE eqegramode,
+         END OF ty_lock_modes .
+  types:
+    ty_lock_modes_t TYPE TABLE OF ty_lock_modes WITH DEFAULT KEY .
 
   data _ROOT_TAB type ROOTTAB .
   data _DEQUEUE_CALLER type ref to ZTBOX_CL_FMODULER .
@@ -39,6 +47,8 @@ private section.
   data _ENQ_MODE type C .
   data _KEY_FIELDS type TY_KEY_FIELDS_T .
   constants C_FOREIGN_LOCK type CHAR30 value 'FOREIGN_LOCK' ##NO_TEXT.
+  class-data _LOCK_MODES type TY_LOCK_MODES_T .
+  data _COLLISION_LOCK type EQEGRAMODE .
 
   methods _SET_FUNCTIONS .
   methods _GET_FIELDS_LIST
@@ -48,6 +58,8 @@ private section.
   methods _MAP_KEYS
     importing
       !IS_KEYS type ANY .
+  class-methods _SET_LOCK_MODES .
+  methods _SET_COLLISION_LOCK .
 ENDCLASS.
 
 
@@ -108,6 +120,7 @@ CLASS ZTBOX_CL_LOCKWAITER IMPLEMENTATION.
 
   METHOD wait_for.
 
+    CHECK _collision_lock IS NOT INITIAL.
     CLEAR _message.
 
     _enqueue_caller->free( ).
@@ -118,7 +131,7 @@ CLASS ZTBOX_CL_LOCKWAITER IMPLEMENTATION.
 
     ENDLOOP.
 
-    _enqueue_caller->exporting( i_name = |MODE_{ _root_tab }| i_value = |V| ).
+    _enqueue_caller->exporting( i_name = |MODE_{ _root_tab }| i_value = _collision_lock ).
     _enqueue_caller->exporting( i_name = |_WAIT| i_value = abap_true ).
 
     IF i_endlessly EQ abap_true.
@@ -144,6 +157,8 @@ CLASS ZTBOX_CL_LOCKWAITER IMPLEMENTATION.
 
     _map_keys( is_keys ).
 
+    _set_collision_lock( ).
+
   ENDMETHOD.
 
 
@@ -161,7 +176,12 @@ CLASS ZTBOX_CL_LOCKWAITER IMPLEMENTATION.
         no_ddic_type  = 1
         not_found     = 2 ).
 
-    DELETE r_fields WHERE domname EQ 'MANDT'.
+    SORT r_fields BY position.
+
+    READ TABLE r_fields ASSIGNING FIELD-SYMBOL(<mandt>) WITH KEY domname = 'MANDT'.
+    IF sy-subrc EQ 0.
+      <mandt>-fieldname = 'MANDT'.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -171,6 +191,11 @@ CLASS ZTBOX_CL_LOCKWAITER IMPLEMENTATION.
     LOOP AT _key_fields ASSIGNING FIELD-SYMBOL(<key>).
 
       CLEAR <key>-value.
+
+      IF <key>-fieldname EQ 'MANDT'.
+        <key>-value = sy-mandt.
+        CONTINUE.
+      ENDIF.
 
       ASSIGN COMPONENT <key>-fieldname OF STRUCTURE is_keys TO FIELD-SYMBOL(<key_value>).
       CHECK sy-subrc EQ 0.
@@ -212,6 +237,56 @@ CLASS ZTBOX_CL_LOCKWAITER IMPLEMENTATION.
   METHOD get_message.
 
     r_mess = _message.
+
+  ENDMETHOD.
+
+
+  METHOD class_constructor.
+
+    _set_lock_modes( ).
+
+  ENDMETHOD.
+
+
+  METHOD _set_collision_lock.
+
+    DATA enq_tab  TYPE TABLE OF seqg3.
+    DATA gname    TYPE eqegraname.
+    DATA garg     TYPE eqegraarg.
+
+    gname = _root_tab.
+
+    LOOP AT _key_fields INTO DATA(key).
+      garg = COND #( WHEN sy-tabix EQ 1 THEN |{ key-value }| ELSE |{ garg }{ key-value }| ).
+    ENDLOOP.
+
+    CALL FUNCTION 'ENQUEUE_READ'
+      EXPORTING
+        gclient               = sy-mandt
+        gname                 = gname
+        garg                  = garg
+      TABLES
+        enq                   = enq_tab
+      EXCEPTIONS
+        communication_failure = 1
+        system_failure        = 2
+        OTHERS                = 3.
+
+    CHECK sy-subrc EQ 0.
+
+    DATA(gmode) = VALUE #( enq_tab[ 1 ]-gmode OPTIONAL ).
+
+    _collision_lock = VALUE #( _lock_modes[ collision = gmode ]-lock_mode OPTIONAL ).
+
+  ENDMETHOD.
+
+
+  METHOD _set_lock_modes.
+
+    _lock_modes = VALUE #(
+      ( lock_mode = 'U' collision = 'X' )
+      ( lock_mode = 'V' collision = 'E' )
+      ( lock_mode = 'W' collision = 'S' ) ).
 
   ENDMETHOD.
 ENDCLASS.

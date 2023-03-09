@@ -43,6 +43,11 @@
      <DESCRIPT>Wait until the object is free</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
+     <CMPNAME>_COLLISION_LOCK</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Lock Mode (Shared/Exclusive) of a Lock Entry</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
      <CMPNAME>_DEQUEUE_CALLER</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Dynamic Function Module Caller</DESCRIPT>
