@@ -38,7 +38,7 @@
      <DESCRIPT>Unlock the object</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CMPNAME>WAIT_FOR</CMPNAME>
+     <CMPNAME>WAIT</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Wait until the object is free</DESCRIPT>
     </SEOCOMPOTX>

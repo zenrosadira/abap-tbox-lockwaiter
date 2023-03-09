@@ -12,7 +12,7 @@ public section.
   methods SET_OBJECT
     importing
       !IS_KEYS type ANY .
-  methods WAIT_FOR
+  methods WAIT
     importing
       !I_ENDLESSLY type FLAG optional .
   methods GET_MESSAGE
@@ -114,41 +114,6 @@ CLASS ZTBOX_CL_LOCKWAITER IMPLEMENTATION.
     _dequeue_caller->execute( ).
 
     _message = _enqueue_caller->exception( )-message.
-
-  ENDMETHOD.
-
-
-  METHOD wait_for.
-
-    CHECK _collision_lock IS NOT INITIAL.
-    CLEAR _message.
-
-    _enqueue_caller->free( ).
-
-    LOOP AT _key_fields INTO DATA(key).
-
-      _enqueue_caller->exporting( i_name = key-fieldname i_value = key-value ).
-
-    ENDLOOP.
-
-    _enqueue_caller->exporting( i_name = |MODE_{ _root_tab }| i_value = _collision_lock ).
-    _enqueue_caller->exporting( i_name = |_WAIT| i_value = abap_true ).
-
-    IF i_endlessly EQ abap_true.
-
-      DO.
-        _enqueue_caller->execute( ).
-        IF _enqueue_caller->exception( )-except NE c_foreign_lock.
-          EXIT.
-        ENDIF.
-      ENDDO.
-
-    ELSE.
-
-      _enqueue_caller->execute( ).
-      _message = _enqueue_caller->exception( )-message.
-
-    ENDIF.
 
   ENDMETHOD.
 
@@ -287,6 +252,41 @@ CLASS ZTBOX_CL_LOCKWAITER IMPLEMENTATION.
       ( lock_mode = 'U' collision = 'X' )
       ( lock_mode = 'V' collision = 'E' )
       ( lock_mode = 'W' collision = 'S' ) ).
+
+  ENDMETHOD.
+
+
+  METHOD WAIT.
+
+    CHECK _collision_lock IS NOT INITIAL.
+    CLEAR _message.
+
+    _enqueue_caller->free( ).
+
+    LOOP AT _key_fields INTO DATA(key).
+
+      _enqueue_caller->exporting( i_name = key-fieldname i_value = key-value ).
+
+    ENDLOOP.
+
+    _enqueue_caller->exporting( i_name = |MODE_{ _root_tab }| i_value = _collision_lock ).
+    _enqueue_caller->exporting( i_name = |_WAIT| i_value = abap_true ).
+
+    IF i_endlessly EQ abap_true.
+
+      DO.
+        _enqueue_caller->execute( ).
+        IF _enqueue_caller->exception( )-except NE c_foreign_lock.
+          EXIT.
+        ENDIF.
+      ENDDO.
+
+    ELSE.
+
+      _enqueue_caller->execute( ).
+      _message = _enqueue_caller->exception( )-message.
+
+    ENDIF.
 
   ENDMETHOD.
 ENDCLASS.
