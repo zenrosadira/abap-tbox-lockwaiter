@@ -14,13 +14,22 @@ DATA(lock_waiter) = NEW ztbox_cl_lockwaiter( 'VBAK' ).
 lock_waiter->set_object( VALUE vbak( vbeln = '123' ) ).
 ```
 
-Call method WAIT_FOR to check if the object is free or is locked
+Call method WAIT to check if the object is released or is locked, and the method IS_LOCKED to get a message about lock in the latter case.
 ```
-lock_waiter->wait_for( i_endlessly = abap_true ).
+lock_waiter->wait( ).
+WRITE: lock_waiter->is_locked( ).
 ```
-If the optional parameter `i_endlessly` is true, ABAP session will remain waiting for the object to be released for an unlimited period of time, otherwise the default standard behaviour set a wait of 5 seconds.
+If the optional parameter `i_endlessly` is true, ABAP session will remain waiting for the object to be released for an unlimited period of time (untile timeout for foreground processing), otherwise the default standard behaviour set a wait of 5 seconds.
+```
+lock_waiter->wait( i_endlessly = abap_true ).
+WRITE: |If this statemet is executed, the object is definitely not locked.|.
+```
 
 You can also use this tool to lock or unlock objects using LOCK and UNLOCK methods.
 
 ## Installation
 Install this project using [abapGit](https://abapgit.org/) ![abapGit](https://docs.abapgit.org/img/favicon.png)
+
+## Dependencies
+In order to use this tool you must first install these packages:
+* [ABAP Dynamic Function Module](https://github.com/zenrosadira/abap-tbox-fmoduler)
