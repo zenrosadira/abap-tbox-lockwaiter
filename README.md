@@ -15,10 +15,12 @@ DATA(lock_waiter) = NEW ztbox_cl_lockwaiter( 'VBAK' ).
 lock_waiter->set_object( VALUE vbak( vbeln = '123' ) ).
 ```
 
-Call method WAIT to check if the object is released or is locked, and the method IS_LOCKED to get a message about the lock in the latter case.
+Call method WAIT to check if the object is released or is locked, and the methods IS_LOCKED/LOCK_MESSAGE to get a message about the lock in the latter case.
 ```
 lock_waiter->wait( ).
-WRITE: lock_waiter->is_locked( ).
+IF lock_waiter->is_locked( ).
+  WRITE: lock_waiter->lock_message( ).
+ENDIF.
 ```
 If the optional parameter `i_endlessly` is true, ABAP session will remain waiting for the object to be released for an unlimited period of time (until timeout for foreground processing), otherwise the default standard behaviour set a wait of 5 seconds.
 ```
