@@ -14,9 +14,9 @@ public section.
   methods WAIT_FOR
     importing
       !I_ENDLESSLY type FLAG optional .
-  methods GET_ERRORS
+  methods GET_MESSAGE
     returning
-      value(R_ERRS) type STRING_TABLE .
+      value(R_MESS) type STRING .
   methods LOCK
     importing
       !I_ENQ_MODE type C default 'E' .
@@ -35,14 +35,12 @@ private section.
   data _ROOT_TAB type ROOTTAB .
   data _DEQUEUE_CALLER type ref to ZTBOX_CL_FMODULER .
   data _ENQUEUE_CALLER type ref to ZTBOX_CL_FMODULER .
-  data _ERRORS type STRING_TABLE .
+  data _MESSAGE type STRING .
   data _ENQ_MODE type C .
   data _KEY_FIELDS type TY_KEY_FIELDS_T .
+  constants C_FOREIGN_LOCK type CHAR30 value 'FOREIGN_LOCK' ##NO_TEXT.
 
   methods _SET_FUNCTIONS .
-  methods _ADD_ERROR
-    importing
-      !I_ERR type STRING optional .
   methods _GET_FIELDS_LIST
     returning
       value(R_FIELDS) type DDFIELDS .
@@ -68,13 +66,6 @@ CLASS ZTBOX_CL_LOCKWAITER IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_errors.
-
-    r_errs = _errors.
-
-  ENDMETHOD.
-
-
   METHOD lock.
 
     _enqueue_caller->free( ).
@@ -83,17 +74,15 @@ CLASS ZTBOX_CL_LOCKWAITER IMPLEMENTATION.
 
     LOOP AT _key_fields INTO DATA(key).
 
-      _enqueue_caller->get_param( key-fieldname )->set_value( key-value ).
+      _enqueue_caller->exporting( i_name = key-fieldname i_value = key-value ).
 
     ENDLOOP.
 
-    _enqueue_caller->get_param( |MODE_{ _root_tab }| )->set_value( i_enq_mode ).
+    _enqueue_caller->exporting( i_name = |MODE_{ _root_tab }| i_value = i_enq_mode ).
 
     _enqueue_caller->execute( ).
 
-    DATA(foreign_lock) = _enqueue_caller->exception( ).
-
-    _errors = COND #( WHEN foreign_lock IS NOT INITIAL THEN VALUE #( ( foreign_lock-message ) ) ELSE VALUE #( ) ).
+    _message = _enqueue_caller->exception( )-message.
 
   ENDMETHOD.
 
@@ -104,41 +93,39 @@ CLASS ZTBOX_CL_LOCKWAITER IMPLEMENTATION.
 
     LOOP AT _key_fields INTO DATA(key).
 
-      _dequeue_caller->get_param( key-fieldname )->set_value( key-value ).
+      _dequeue_caller->exporting( i_name = key-fieldname i_value = key-value ).
 
     ENDLOOP.
 
-    _dequeue_caller->get_param( |MODE_{ _root_tab }| )->set_value( _enq_mode ).
+    _dequeue_caller->exporting( i_name = |MODE_{ _root_tab }| i_value = _enq_mode ).
 
     _dequeue_caller->execute( ).
 
-    DATA(foreign_lock) = _dequeue_caller->exception( ).
-
-    _errors = COND #( WHEN foreign_lock IS NOT INITIAL THEN VALUE #( ( foreign_lock-message ) ) ELSE VALUE #( ) ).
+    _message = _enqueue_caller->exception( )-message.
 
   ENDMETHOD.
 
 
   METHOD wait_for.
 
+    CLEAR _message.
+
     _enqueue_caller->free( ).
 
     LOOP AT _key_fields INTO DATA(key).
 
-      _enqueue_caller->get_param( key-fieldname )->set_value( key-value ).
+      _enqueue_caller->exporting( i_name = key-fieldname i_value = key-value ).
 
     ENDLOOP.
 
-    _enqueue_caller->get_param( |MODE_{ _root_tab }| )->set_value( |V| ).
-    _enqueue_caller->get_param( |_WAIT| )->set_value( abap_true ).
+    _enqueue_caller->exporting( i_name = |MODE_{ _root_tab }| i_value = |V| ).
+    _enqueue_caller->exporting( i_name = |_WAIT| i_value = abap_true ).
 
     IF i_endlessly EQ abap_true.
 
       DO.
-        CLEAR _errors.
         _enqueue_caller->execute( ).
-        DATA(foreign_lock) = _enqueue_caller->exception( ).
-        IF foreign_lock IS INITIAL.
+        IF _enqueue_caller->exception( )-except NE c_foreign_lock.
           EXIT.
         ENDIF.
       ENDDO.
@@ -146,24 +133,7 @@ CLASS ZTBOX_CL_LOCKWAITER IMPLEMENTATION.
     ELSE.
 
       _enqueue_caller->execute( ).
-      foreign_lock = _enqueue_caller->exception( ).
-      _errors = COND #( WHEN foreign_lock IS NOT INITIAL THEN VALUE #( ( foreign_lock-message ) ) ELSE VALUE #( ) ).
-
-    ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD _add_error.
-
-    IF i_err IS SUPPLIED.
-
-      APPEND i_err TO _errors.
-
-    ELSE.
-
-      MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4 INTO DATA(lv_msg).
-      APPEND lv_msg TO _errors.
+      _message = _enqueue_caller->exception( )-message.
 
     ENDIF.
 
@@ -190,9 +160,6 @@ CLASS ZTBOX_CL_LOCKWAITER IMPLEMENTATION.
       EXCEPTIONS
         no_ddic_type  = 1
         not_found     = 2 ).
-    IF sy-subrc NE 0.
-      _add_error( ).
-    ENDIF.
 
     DELETE r_fields WHERE domname EQ 'MANDT'.
 
@@ -215,7 +182,7 @@ CLASS ZTBOX_CL_LOCKWAITER IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD _SET_FUNCTIONS.
+  METHOD _set_functions.
 
     SELECT SINGLE viewname
       FROM dd25l
@@ -224,10 +191,7 @@ CLASS ZTBOX_CL_LOCKWAITER IMPLEMENTATION.
         AND as4vers   EQ '0000'
         AND aggtype   EQ 'E'
        INTO @DATA(enqueue).
-    IF sy-subrc NE 0.
-      _add_error( |{ _root_tab } not found.| ).
-      RETURN.
-    ENDIF.
+    CHECK sy-subrc EQ 0.
 
     _enqueue_caller = NEW ztbox_cl_fmoduler( |ENQUEUE_{ enqueue }| ).
     _dequeue_caller = NEW ztbox_cl_fmoduler( |DEQUEUE_{ enqueue }| ).
@@ -241,6 +205,13 @@ CLASS ZTBOX_CL_LOCKWAITER IMPLEMENTATION.
 
     _key_fields = VALUE #( FOR field IN fields_list WHERE ( keyflag EQ abap_true )
       ( fieldname = field-fieldname ) ).
+
+  ENDMETHOD.
+
+
+  METHOD get_message.
+
+    r_mess = _message.
 
   ENDMETHOD.
 ENDCLASS.

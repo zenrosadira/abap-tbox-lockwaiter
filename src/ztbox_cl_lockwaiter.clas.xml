@@ -23,7 +23,7 @@
      <DESCRIPT>Dynamic Function Module Caller</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CMPNAME>_ERRORS</CMPNAME>
+     <CMPNAME>_MESSAGE</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>ABAP System Field: Return Code of ABAP Statements</DESCRIPT>
     </SEOCOMPOTX>
