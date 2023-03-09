@@ -13,6 +13,36 @@
    </VSEOCLASS>
    <DESCRIPTIONS>
     <SEOCOMPOTX>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Pass the table representing the object to lock/watch</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GET_MESSAGE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Read message about lock</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>LOCK</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Lock the object</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>SET_OBJECT</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Set object keys</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>UNLOCK</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Unlock the object</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>WAIT_FOR</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Wait until the object is free</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
      <CMPNAME>_DEQUEUE_CALLER</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Dynamic Function Module Caller</DESCRIPT>
@@ -21,16 +51,6 @@
      <CMPNAME>_ENQUEUE_CALLER</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Dynamic Function Module Caller</DESCRIPT>
-    </SEOCOMPOTX>
-    <SEOCOMPOTX>
-     <CMPNAME>_MESSAGE</CMPNAME>
-     <LANGU>E</LANGU>
-     <DESCRIPT>ABAP System Field: Return Code of ABAP Statements</DESCRIPT>
-    </SEOCOMPOTX>
-    <SEOCOMPOTX>
-     <CMPNAME>_ROOT_TAB</CMPNAME>
-     <LANGU>E</LANGU>
-     <DESCRIPT>Primary table of an aggregate</DESCRIPT>
     </SEOCOMPOTX>
    </DESCRIPTIONS>
    <DESCRIPTIONS_SUB>
