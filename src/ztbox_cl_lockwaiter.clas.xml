@@ -18,7 +18,7 @@
      <DESCRIPT>Pass the table representing the object to lock/watch</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CMPNAME>GET_MESSAGE</CMPNAME>
+     <CMPNAME>IS_LOCKED</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Read message about lock</DESCRIPT>
     </SEOCOMPOTX>

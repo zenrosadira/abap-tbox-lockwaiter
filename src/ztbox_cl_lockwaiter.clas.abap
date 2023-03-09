@@ -15,7 +15,7 @@ public section.
   methods WAIT
     importing
       !I_ENDLESSLY type FLAG optional .
-  methods GET_MESSAGE
+  methods IS_LOCKED
     returning
       value(R_MESS) type STRING .
   methods LOCK
@@ -199,13 +199,6 @@ CLASS ZTBOX_CL_LOCKWAITER IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_message.
-
-    r_mess = _message.
-
-  ENDMETHOD.
-
-
   METHOD class_constructor.
 
     _set_lock_modes( ).
@@ -287,6 +280,13 @@ CLASS ZTBOX_CL_LOCKWAITER IMPLEMENTATION.
       _message = _enqueue_caller->exception( )-message.
 
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD IS_LOCKED.
+
+    r_mess = _message.
 
   ENDMETHOD.
 ENDCLASS.
