@@ -8,22 +8,24 @@ Called like this, the function waits for 5 seconds with a retry of every one sec
 
 **Warning: the standard function performs a WAIT, so a database commit is invoked.**
 
-## Usage
-Create an object of class ZTBOX_CL_LOCKWAITER passing the table representing the object to check, and call method SET OBJECT to set keys that identify an object
-```
+## Quick Start
+```abap
+* First, create an instance passing the table representing the object to check
 DATA(lock_waiter) = NEW ztbox_cl_lockwaiter( 'VBAK' ).
-lock_waiter->set_object( VALUE vbak( vbeln = '123' ) ).
-```
 
-Call method WAIT to check if the object is released or is locked, and the methods IS_LOCKED/LOCK_MESSAGE to get a message about the lock in the latter case.
-```
+* Call SET_OBJECT to set the keys identifying an object
+lock_waiter->set_object( VALUE vbak( vbeln = '123' ) ).
+
+* Call method WAIT to check if the object is released or is locked, 
+* and the methods IS_LOCKED/LOCK_MESSAGE to get a message about the lock in the latter case.
 lock_waiter->wait( ).
 IF lock_waiter->is_locked( ).
   WRITE: lock_waiter->lock_message( ).
 ENDIF.
-```
-If the optional parameter `i_endlessly` is true, ABAP session will remain waiting for the object to be released for an unlimited period of time (until timeout for foreground processing), otherwise the default standard behaviour set a wait of 5 seconds.
-```
+
+* If the optional parameter `i_endlessly` is true, ABAP session will remain waiting for the object to be released 
+* for an unlimited period of time (until timeout for foreground processing)
+* otherwise the default standard behaviour set a wait of 5 seconds.
 lock_waiter->wait( i_endlessly = abap_true ).
 WRITE: |If this statemet is executed, the object is definitely not locked.|.
 ```
